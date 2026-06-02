@@ -1,0 +1,30 @@
+name: Deploy to QA
+
+on:
+  push:
+    branches:
+      - developQA
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Salesforce CLI
+        run: npm install -g @salesforce/cli
+
+      - name: Authenticate QA Org
+        run: |
+          echo "${{ secrets.SF_AUTH_URL_QA }}" > auth.txt
+          sf org login sfdx-url \
+            --sfdx-url-file auth.txt \
+            --alias QA
+
+      - name: Deploy Metadata
+        run: |
+          sf project deploy start \
+            --source-dir force-app \
+            --target-org QA
