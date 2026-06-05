@@ -1,0 +1,30 @@
+name: Deploy to Stage
+
+on:
+  push:
+    branches:
+      - stagebranch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Salesforce CLI
+        run: npm install -g @salesforce/cli
+
+      - name: Authenticate Stage Org
+        run: |
+          echo "${{ secrets.SF_AUTH_URL_STAGE }}" > auth.txt
+          sf org login sfdx-url \
+            --sfdx-url-file auth.txt \
+            --alias STAGE
+
+      - name: Deploy Metadata
+        run: |
+          sf project deploy start \
+            --source-dir force-app \
+            --target-org STAGE
